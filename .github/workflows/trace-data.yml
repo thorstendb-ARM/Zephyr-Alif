@@ -55,6 +55,12 @@ jobs:
       - name: Install pinned Chromium
         working-directory: tests/trace_data
         run: npx --no-install playwright install --with-deps --no-shell chromium
+      - name: Use the installed Chrome sandbox on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          test -u /opt/google/chrome/chrome-sandbox
+          printf '%s\n' 'CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox' >> "$GITHUB_ENV"
       - name: Check evidence, Mermaid, responsive layout and diagnostics
         run: python tests/trace_data/run_checks.py --browser-checks
       - name: Upload reviewed skill package
