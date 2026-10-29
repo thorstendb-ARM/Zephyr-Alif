@@ -50,64 +50,6 @@ runtime setup and a runnable minimal example. Package version is available with
 Current explanations in [examples](examples/) contain native Mermaid in Markdown,
 with no SVG/PNG exports or separate `.mmd` copies.
 
-## Release checks
-
-Portable tests and synthetic fixtures are in [tests/trace_data](../tests/trace_data/).
-The checks are grouped by the behavior they protect:
-
-| Test module | Purpose |
-| --- | --- |
-| [Evidence](../tests/trace_data/test_trace_evidence.py) | CSV hashes, row mappings, clocks, loss boundaries and partial intervals; published report/CSV pairs. |
-| [Views](../tests/trace_data/test_trace_views.py) | All four Mermaid view types, complete timelines, presets and evidence-backed generation. |
-| [Markdown](../tests/trace_data/test_trace_markdown.py) | Diagnostic logs, recovery, unchanged valid content and parser/platform failures. |
-| [Mermaid integration](../tests/trace_data/test_mermaid_integration.py) | Official parser, finished reports and native browser style/scaling checks. |
-| [Portability](../tests/trace_data/test_trace_skill_portability.py) | Three-file package and standalone Python execution without repository or site-package dependencies. |
-
-The three synthetic CSV/JSON pairs cover early CLEAR, unknown clocks with partial
-intervals, and custom columns with independent core clocks.
-The semantic tests need no board or graphics dependencies:
-
-```sh
-python3 tests/trace_data/run_checks.py
-```
-
-This also checks the example CSV references/hashes and the portable three-file
-package contract. All tests use the helper directly beside `SKILL.md` in
-`.agents/skills/trace-visualization/`; they are not part of the portable package.
-
-For the required real-parser and native DOM checks, install the locked development
-dependencies (Node.js 22+) and their pinned Chromium once in a cache outside the
-checkout. From the repository root, for example in a POSIX shell:
-
-```sh
-export TRACE_TEST_TOOLS="$HOME/.cache/trace-data-tests"
-mkdir -p "$TRACE_TEST_TOOLS"
-cp tests/trace_data/package*.json "$TRACE_TEST_TOOLS/"
-npm ci --prefix "$TRACE_TEST_TOOLS" --ignore-scripts --no-audit --no-fund
-PLAYWRIGHT_BROWSERS_PATH="$TRACE_TEST_TOOLS/.browser-cache" \
-  node "$TRACE_TEST_TOOLS/node_modules/playwright/cli.js" install --with-deps --no-shell chromium
-python3 tests/trace_data/run_checks.py --browser-checks --tools-dir "$TRACE_TEST_TOOLS"
-```
-
-`--tools-dir` selects the external installation and discovers its `.browser-cache`.
-An explicit `PLAYWRIGHT_BROWSERS_PATH` or `--browser` still takes precedence.
-After dependency updates, copy the two package files and repeat installation.
-CI installs into its temporary checkout and uses the test directory default.
-
-These checks cover all four view kinds, actual syntax rejection and diagnostic
-recovery, fixed colors/shapes and proportional sizing at 360/600/1000/1600 px.
-They also parse every finished report in `docs/examples` and require its complete
-Mermaid style preset; temporary validation copies keep reports free of test logs.
-They inspect native browser DOM without producing SVG/PNG files. The lockfile
-pins Mermaid 11.17.2, Playwright 1.64.1 and Chromium 156.0.8078.4. Development
-dependencies and the browser are not part of the three-file skill.
-
-The [CI workflow](../.github/workflows/trace-data.yml) runs Linux/Python 3.10 and
-3.14, Windows/Python 3.13 and macOS/Python 3.14, then supplies the skill and license
-as a review artifact. Local checks have run on macOS arm64/Python 3.14.5;
-the hosted cross-platform matrix still needs its first run before publication.
-Changes to the skill, its tests or finished reports trigger these checks.
-
 ## Hardware trace explanations
 
 Each finished analysis sits beside its original, unmodified CSV in

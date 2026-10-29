@@ -926,7 +926,7 @@ def run_mermaid_browser(javascript, mermaid_js=None, browser=None, timeout=30,
     """Run an async body with initialized ``engine``; return JSON, never image files.
 
     The body can use ``engine``, ``warnings`` and ``initializationWarnings`` and
-    must return an object. The parser uses only parse(); integration tests can
+    must return an object. The parser uses only parse(); callers can
     inspect rendered browser DOM without writing diagram exports.
     """
     from urllib.parse import quote

@@ -9,8 +9,7 @@ than supplying a diagnosis. Commands below run from the skill directory.
 
 Release **0.1.0** requires **Python 3.10+**. Evidence validation and Mermaid
 generation use only the standard library. The reference parser is official
-**Mermaid 11.17.2**, with Chrome/Chromium; the reproducible release checks pin
-Playwright 1.64.1 and its Chromium 156. Other Markdown viewers may apply different
+**Mermaid 11.17.2**, with Chrome/Chromium. Other Markdown viewers may apply different
 Mermaid versions or restrict theme settings, so inspect the actual delivery viewer.
 The helper checks supplied CSV evidence and calculations; sequence references,
 source associations, catalog completeness and diagnosis remain the agent's work.

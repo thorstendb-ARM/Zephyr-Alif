@@ -1,7 +1,0 @@
-cycles,stream,type,index,value,pc,address,note
-1000,1,dwt,7,0xAA,0x1010,,
-500000,2,exception,21,1,,,
-500050,2,dwt,9,0xFFFFFFFF,0x2020,,
-1030,1,dwt,8,1,0x1020,,
-1040,1,dwt,7,0xBB,0x1010,,
-501600,2,exception,21,2,,,
