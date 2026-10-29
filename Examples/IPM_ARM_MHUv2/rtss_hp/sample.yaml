@@ -5,4 +5,4 @@ tests:
   sample.drivers.ipm:
     tags: MHUv2
     platform_allow:
-      alif_e7_ak_rtss_hp alif_e7_dk_rtss_hp alif_e3_ak_rtss_hp alif_e3_ak_rtss_hp
+      alif_e7_ak_rtss_hp alif_e7_dk_rtss_hp alif_e3_ak_rtss_hp

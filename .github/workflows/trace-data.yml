@@ -1,0 +1,69 @@
+name: Trace Data
+
+on:
+  push:
+    paths:
+      - ".gitattributes"
+      - ".agents/skills/trace-visualization/**"
+      - "docs/examples/**"
+      - "tests/trace_data/**"
+      - ".github/workflows/trace-data.yml"
+  pull_request:
+    paths:
+      - ".gitattributes"
+      - ".agents/skills/trace-visualization/**"
+      - "docs/examples/**"
+      - "tests/trace_data/**"
+      - ".github/workflows/trace-data.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.14"
+          - os: windows-latest
+            python: "3.13"
+          - os: macos-latest
+            python: "3.14"
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tests/trace_data/package-lock.json
+      - name: Install locked validation dependencies
+        working-directory: tests/trace_data
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install pinned Chromium
+        working-directory: tests/trace_data
+        run: npx --no-install playwright install --with-deps --no-shell chromium
+      - name: Check evidence, Mermaid, responsive layout and diagnostics
+        run: python tests/trace_data/run_checks.py --browser-checks
+      - name: Upload reviewed skill package
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.14'
+        uses: actions/upload-artifact@v6
+        with:
+          name: trace-data-0.1.0
+          path: |
+            .agents/skills/trace-visualization/
+            LICENSE
+          include-hidden-files: true
+          if-no-files-found: error

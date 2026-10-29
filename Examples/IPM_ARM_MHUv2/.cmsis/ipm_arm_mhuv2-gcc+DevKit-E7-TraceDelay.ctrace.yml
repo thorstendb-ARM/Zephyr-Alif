@@ -1,0 +1,67 @@
+ctrace:
+  created-by: CMSIS Debugger
+  setup:
+    - pname: M55_HE
+      core: Cortex-M55
+      timestamps:
+        itm-prescaler: 1
+      data:
+        - location: 0x4009000c
+          label: MHU0_TX_CH0_SET
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x4009002c
+          label: MHU0_TX_CH1_SET
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x40080008
+          label: MHU0_RX_CH0_CLR
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x40080028
+          label: MHU0_RX_CH1_CLR
+          access: W
+          size: 4
+          output: PC+value
+      exceptions:
+      itm:
+        enable: 0x0
+      pcsampling:
+        period: 0
+      synchronization:
+        DWT: 16M
+    - pname: M55_HP
+      core: Cortex-M55
+      timestamps:
+        itm-prescaler: 1
+      data:
+        - location: 0x4009000c
+          label: MHU0_TX_CH0_SET
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x4009002c
+          label: MHU0_TX_CH1_SET
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x40080008
+          label: MHU0_RX_CH0_CLR
+          access: W
+          size: 4
+          output: PC+value
+        - location: 0x40080028
+          label: MHU0_RX_CH1_CLR
+          access: W
+          size: 4
+          output: PC+value
+      exceptions:
+      itm:
+        enable: 0x0
+      pcsampling:
+        period: 0
+      synchronization:
+        DWT: 16M

@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "title": "Mailbox transfers complete normally",
+  "subtitle": "Queue BLUE \u00b7 custom CSV fields and independent clocks",
+  "timebases": [
+    {
+      "id": "control-local",
+      "label": "Control CPU",
+      "stream": 5,
+      "origin_cycles": 48000,
+      "clock_hz": 48000000,
+      "epoch": "boot-3"
+    },
+    {
+      "id": "dsp-local",
+      "label": "DSP worker",
+      "stream": 9,
+      "origin_cycles": 96000,
+      "clock_hz": 96000000,
+      "epoch": "boot-3"
+    }
+  ],
+  "events": [
+    {
+      "id": "send-1",
+      "timebase": "control-local",
+      "line": 2,
+      "label": "Publish BLUE",
+      "role": "send",
+      "channel": "BLUE",
+      "occurrence": 1,
+      "type": "dwt",
+      "index": 4,
+      "value": "0x41",
+      "pc": "0x4010"
+    },
+    {
+      "id": "entry-1",
+      "timebase": "dsp-local",
+      "line": 3,
+      "label": "RX entry",
+      "role": "event",
+      "type": "exception",
+      "index": 35,
+      "value": 1
+    },
+    {
+      "id": "clear-1",
+      "timebase": "dsp-local",
+      "line": 4,
+      "label": "Clear BLUE",
+      "role": "clear",
+      "type": "dwt",
+      "index": 6,
+      "value": 1,
+      "pc": "0x5010"
+    },
+    {
+      "id": "exit-1",
+      "timebase": "dsp-local",
+      "line": 5,
+      "label": "RX exit",
+      "role": "event",
+      "type": "exception",
+      "index": 35,
+      "value": 2
+    },
+    {
+      "id": "done-1",
+      "timebase": "control-local",
+      "line": 6,
+      "label": "Completion observed",
+      "role": "event",
+      "type": "dwt",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "id": "send-2",
+      "timebase": "control-local",
+      "line": 7,
+      "label": "Publish BLUE",
+      "role": "send",
+      "channel": "BLUE",
+      "occurrence": 2,
+      "type": "dwt",
+      "index": 4,
+      "value": "0x42",
+      "pc": "0x4010"
+    },
+    {
+      "id": "entry-2",
+      "timebase": "dsp-local",
+      "line": 8,
+      "label": "RX entry",
+      "role": "event",
+      "type": "exception",
+      "index": 35,
+      "value": 1
+    },
+    {
+      "id": "clear-2",
+      "timebase": "dsp-local",
+      "line": 9,
+      "label": "Clear BLUE",
+      "role": "clear",
+      "type": "dwt",
+      "index": 6,
+      "value": 1
+    },
+    {
+      "id": "exit-2",
+      "timebase": "dsp-local",
+      "line": 10,
+      "label": "RX exit",
+      "role": "event",
+      "type": "exception",
+      "index": 35,
+      "value": 2
+    },
+    {
+      "id": "done-2",
+      "timebase": "control-local",
+      "line": 11,
+      "label": "Completion observed",
+      "role": "event",
+      "type": "dwt",
+      "index": 2,
+      "value": 2
+    }
+  ],
+  "intervals": [
+    {
+      "id": "rx-1",
+      "start": "entry-1",
+      "end": "exit-1",
+      "label": "Entire RX handler",
+      "occurrence": 1
+    },
+    {
+      "id": "rx-2",
+      "start": "entry-2",
+      "end": "exit-2",
+      "label": "Entire RX handler",
+      "occurrence": 2
+    }
+  ],
+  "quality": {
+    "notes": [
+      "Synthetic fixture with two completed transfers; no delay is asserted."
+    ]
+  },
+  "source": {
+    "csv": "normal-transfer.csv",
+    "sha256": "ad3f73e505787b0fa49b84adb84e5a063873a05d507ba50c3f3cc666d7a344ce",
+    "origin": "synthetic",
+    "target": "Offline renderer fixture",
+    "columns": {
+      "cycles": "timestamp",
+      "stream": "source_id",
+      "type": "kind",
+      "index": "slot",
+      "value": "payload",
+      "pc": "program_counter",
+      "note": "diagnostic"
+    }
+  }
+}

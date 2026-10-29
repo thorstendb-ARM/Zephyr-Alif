@@ -1,0 +1,21 @@
+/* Reserve the final 64 KiB of E7 SRAM0 for the shared SoC ETR.
+ * Both the HP and HE applications must honor this same allocation.
+ * No startup initialization, CPU mapping, or trace enablement is requested here.
+ */
+
+&sram0 {
+	reg = <0x02000000 0x003f0000>;
+};
+
+/ {
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		etr_trace_buffer: trace-buffer@23f0000 {
+			reg = <0x023f0000 0x00010000>;
+			no-map;
+		};
+	};
+};

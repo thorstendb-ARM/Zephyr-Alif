@@ -3,6 +3,12 @@
 MHUv2 test Sample
 #################
 
+.. note::
+
+   This upstream Alif sample reference retains historical board names, SDK paths
+   and output. For this repository's setup, target selection, build/debug and
+   trace capture, follow the `CMSIS workflow <../../../README.md>`_.
+
 Overview
 ********
 

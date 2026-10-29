@@ -97,3 +97,8 @@ tools-environment.yml
 # FVP model generated files when using with SDS
 **/__pycache__/
 sdsio.log
+
+# Local captures and investigation scratch files
+**/.trace/
+.agent-artifacts/
+.DS_Store

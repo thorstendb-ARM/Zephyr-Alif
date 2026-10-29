@@ -1,0 +1,6 @@
+cycles,stream,type,index,value,pc,address,note
+99980,7,dwt,0,0x1,0x3000,,
+100000,7,exception,27,1,,,
+100025,7,dwt,1,0x10,0x3010,,
+100120,7,exception,27,2,,,
+100300,7,exception,27,1,,,

@@ -1,0 +1,6 @@
+# Preserve byte-backed trace evidence and portable skill assets on every host.
+.agents/skills/trace-visualization/** text eol=lf
+docs/examples/*.csv text eol=lf
+
+# Captures are generated evidence.
+docs/examples/*.csv linguist-generated=true

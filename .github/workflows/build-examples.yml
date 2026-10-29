@@ -82,6 +82,17 @@ jobs:
           --packs
           --context ".${{ matrix.build-type }}+${{ matrix.target }}"
 
+      - name: Build E7 trace scenarios
+        if: matrix.solution.name == 'IPM_ARM_MHUv2' && matrix.target == 'DevKit-E7' && matrix.build-type == 'Debug'
+        working-directory: ${{ matrix.solution.directory }}
+        env:
+          ZEPHYR_BASE: ${{ github.workspace }}/sdk-alif/zephyr
+        shell: bash
+        run: |
+          for trace_target in DevKit-E7-TraceDelay DevKit-E7-TraceDelayMulti DevKit-E7-NoWait DevKit-E7-NoWaitMulti; do
+            cbuild "${{ matrix.solution.file }}" --packs --context ".Debug+${trace_target}"
+          done
+
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v6
