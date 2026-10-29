@@ -11,19 +11,58 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/ipm.h>
 
-#define ITERATIONS 10
+#ifndef TRACE_DEMO_ITERATIONS
+#define TRACE_DEMO_ITERATIONS 10
+#endif
+#if defined(TRACE_DEMO_RX_DELAY) && TRACE_DEMO_RX_DELAY
+#ifndef TRACE_DEMO_DELAY_ROUND
+#define TRACE_DEMO_DELAY_ROUND 5U
+#endif
+#ifndef TRACE_DEMO_DELAY_US
+#define TRACE_DEMO_DELAY_US 50000U
+#endif
+#ifndef TRACE_DEMO_SECOND_DELAY_ROUND
+#define TRACE_DEMO_SECOND_DELAY_ROUND 0U
+#endif
+#ifndef TRACE_DEMO_SECOND_DELAY_US
+#define TRACE_DEMO_SECOND_DELAY_US 0U
+#endif
+#endif
 const struct device *mhu0_r;
 const struct device *mhu0_s;
 
 static volatile bool msg_sent;
 static volatile bool msg_received;
 static uint32_t tx_msg;
+#if defined(TRACE_DEMO_RX_DELAY) && TRACE_DEMO_RX_DELAY
+static uint32_t ch0_rx_count;
+#endif
 
 static void recv_cb(const struct device *mhuv2_ipmdev, void *user_data,
 		uint32_t id, volatile void *data)
 {
 	ARG_UNUSED(mhuv2_ipmdev);
 	ARG_UNUSED(user_data);
+
+#if defined(TRACE_DEMO_RX_DELAY) && TRACE_DEMO_RX_DELAY
+	if (id == 0U && ch0_rx_count < TRACE_DEMO_ITERATIONS) {
+		uint32_t delay_us = 0U;
+
+		++ch0_rx_count;
+		if (ch0_rx_count == TRACE_DEMO_DELAY_ROUND) {
+			delay_us = TRACE_DEMO_DELAY_US;
+		} else if (ch0_rx_count == TRACE_DEMO_SECOND_DELAY_ROUND) {
+			delay_us = TRACE_DEMO_SECOND_DELAY_US;
+		}
+		if (delay_us != 0U) {
+			/* Deliberately slow the selected RX ISR. The driver writes
+			 * CH_CLR only after this callback returns, delaying the
+			 * sender's completion as well. Do not sleep in an ISR.
+			 */
+			k_busy_wait(delay_us);
+		}
+	}
+#endif
 
 	printk("RTSS-HE: MSG rcvd on ch:%d is 0x%x\n", id, *((uint32_t *)data));
 	msg_received = true;
@@ -80,7 +119,7 @@ int main(void)
 	/* Enable Rx MHU interrupt */
 	ipm_set_enabled(mhu0_r, true);
 
-	while (i < ITERATIONS) {
+	while (i < TRACE_DEMO_ITERATIONS) {
 		while (!msg_received)
 			;
 		send();

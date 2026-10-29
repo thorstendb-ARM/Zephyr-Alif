@@ -15,11 +15,19 @@ solution:
       target-set:
         - set:
           debugger:
-            name: CMSIS-DAP@pyOCD
-            port: 3333
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HE
+              - port: 53334
+                pname: M55_HP
             protocol: swd
             clock: 10000000
             start-pname: M55_HE
+            trace:
+              # Sink lifecycle is supplied by the project-local pyocd_user.py.
+              - trace-buffer:
+                mode: file
           images:
             - project-context: LPI2C.Debug
 

@@ -20,7 +20,8 @@ The example setup uses an Arm [ULINKplus debug adapter](https://www.arm.com/prod
   dual-core projects.
 
 > [!NOTE]
-> Ensure that the **Arm CMSIS Solution** extension is version 1.72.0 or later.
+> Use **Arm CMSIS Solution 1.72.0+** and **Arm CMSIS Debugger 1.10.0+**.
+> The debugger includes the trace decoder and automatic CSV export.
 
 > [!TIP]
 > If configuration or build errors occur, use **Clean All 'out' and 'tmp' directories** from the CMSIS view menu to
@@ -170,16 +171,54 @@ the **PRG USB** port and configure header **J26** for the core whose `printk` ou
 
 | Core | Console UART | J26 jumpers |
 |---|---|---|
-| M55_HE (RTSS-HE) | UART4 | Pins 3-5 and 4-6 (factory default) |
-| M55_HP (RTSS-HP) | UART2 | Pins 1-3 and 2-4 |
+| M55_HE (RTSS-HE), including LPI2C | UART2 | Pins 1-3 and 2-4 |
+| M55_HP (RTSS-HP) | UART4 | Pins 3-5 and 4-6 (factory default) |
+
+These core assignments come from the Alif SDK 2.3 E7 board devicetrees.
+The SETOOLS single-/dual-core configuration does not change the physical UART
+routing. The factory J26 setting therefore selects the HP console for these builds.
 
 Open the application UART serial port at **115200 baud, 8 data bits, no parity, and 1 stop bit (8-N-1)**. Do not use
 the other USB serial channel, which is the SEUART used by SETOOLS for programming. Power off the board before moving
 the J26 jumpers.
 
+Open the terminal before starting the application to see its startup output.
+The examples do not print continuously: LPI2C runs one transfer test,
+and IPM runs ten message-exchange iterations before returning. Debug stubs alone do not run
+these examples, and a core halted at `main()` has not executed their main output yet.
+
 J26 cannot connect UART2 and UART4 to the on-board bridge simultaneously. To monitor output from both cores in the
 `IPM_ARM_MHUv2` example, connect a separate **1.8 V-compatible** USB-to-UART adapter and a common ground to the UART
 that is not selected by J26.
+
+## E7 buffered trace
+
+The IPM targets provide short, repeatable trace investigations:
+
+| IPM target | What to show |
+| --- | --- |
+| **DevKit-E7** | Original ten-round exchange; reference behavior. |
+| **DevKit-E7-NoWait** | Nine acknowledged pairs, then two writes before acknowledgment: HP receives one merged word. |
+| **DevKit-E7-NoWaitMulti** | Twelve rounds; two PINGs before one PONG in rounds 4 and 9. [Mermaid comparison](./docs/examples/ipm-ping-pong-multi-2026-10-28.md) · [hardware CSV](./docs/examples/ipm-ping-pong-multi-2026-10-28.csv). |
+| **DevKit-E7-TraceDelay** | A 50 ms delay in the fifth HE receive callback; all ten rounds complete. |
+| **DevKit-E7-TraceDelayMulti** | Twelve rounds; 15 ms and 30 ms delays in HE channel-0 receives 3 and 8. [Mermaid explanation and timeline](./docs/examples/ipm-trace-delay-multi-2026-10-28.md) · [hardware CSV](./docs/examples/ipm-trace-delay-multi-2026-10-28.csv). |
+| **DevKit-E8** | Existing board target; the E7 trace demonstrations and debug hooks are not validated here. |
+
+Select the target in either IPM compiler solution; no source edit is needed.
+The [trace overview](./docs/README.md) links the figures, CSVs and validation notes.
+
+The project-local [Trace Data skill](./.agents/skills/trace-visualization/SKILL.md)
+explains captures together with source using native Mermaid. Codex discovers it
+from `.agents/skills/`; other agents can follow [AGENTS.md](./AGENTS.md).
+
+The NoWait and TraceDelay scenarios passed earlier AC6 Debug hardware capture
+checks. The [NoWaitMulti](./docs/README.md#hardware-validation-twelve-rounds-and-two-nowait-events)
+and [TraceDelayMulti](./docs/README.md#hardware-validation-twelve-rounds-and-two-delays)
+validation notes record the tested runs, capture limits and debugger diagnostics.
+
+**LPI2C / DevKit-E7** remains a single-core trace introduction: HE PC sampling,
+ITM and automatic buffered capture. Previous validation covered startup, idle
+and repeated capture/export; no I2C fault diagnosis was established.
 
 ## Example descriptions
 
@@ -190,18 +229,33 @@ that is not selected by J26.
 
 ## Work with the example
 
-When working on a dual-core project:
+For an **IPM / DevKit-E7 target / Debug** configuration:
 
-- Start the **M55_HP CMSIS_DAP@pyOCD (launch)** debug session first, followed by **M55_HE CMSIS_DAP@pyOCD (attach)**.
-- After starting the second debug session, the program will halt at `cpu_idle.S`. This occurs because the second core
-  remains in its idle loop until it receives a valid entry point. To resolve this, add the following commands to the
-  **M55_HE CMSIS_DAP@pyOCD (attach)** section in `launch.json`:
+1. Select the target and available board probe, wait for target setup to finish,
+   then **Build** both images.
+   The debugger automatically converts the committed `.cmsis/*.ctrace.yml` profile
+   against the selected target's build output; no manual conversion or generated
+   trace configuration is required after cloning.
+2. Use **Load & Debug application**. The HP launch loads both images, resets
+   both cores together, starts HE and stops HP at `main()`. After a target change,
+   verify that the loaded ELF and cbuild-run belong to the selected target.
+3. **Continue HP**. NoWait and NoWaitMulti stop at their completion breakpoint; verify
+   `trace_demo_result == 1`. Normal and TraceDelay finish ten rounds;
+   TraceDelayMulti finishes twelve. **Pause** or stop afterwards. The debugger
+   automatically decodes the buffer to `.trace/<solution>+<target>.TB.csv`
+   and opens the trace data. No separate export command is needed.
+4. Preserve `.TB.raw`, `.TB.csv` and `.ctrace-run.yml` from the example's
+   `.trace/` directory before another Continue replaces the capture.
+   Use **Reset** in the HP launch or a fresh **Load & Debug** to repeat.
 
-  ```bash
-  "initCommands": [
-     "monitor reset halt",
-     "tbreak main"
-  ]
-  ```
+The project-local reset and trace hooks use a shared 64 KiB SRAM0 buffer;
+GDB controls HP while both cores are traced. The installed Pack and pyOCD are
+unchanged. Keep `updateConfiguration` set to `auto`; after changing a launch
+or task drop-in, run **Update Debug Tasks and Launch Configurations**.
+The E7 hooks require adaptation before use with E8 or different image addresses.
 
-- Set `updateConfiguration` to `manual` to prevent your settings from being overwritten.
+For **LPI2C / DevKit-E7 / Debug**, select its compiler solution, build, then
+**Load & Debug** and **Continue HE**. Pause after the transfer test to obtain the
+CSV in that example's `.trace/` directory. The SDK environment, selected probe
+and one-time board preparation above are the only machine-specific prerequisites;
+capture profiles, buffer reservations and debug hooks are supplied by this repository.

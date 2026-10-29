@@ -1,0 +1,28 @@
+ctrace:
+  created-by: CMSIS Debugger
+  setup:
+    - pname: M55_HE
+      core: Cortex-M55
+      timestamps:
+        itm-prescaler: 1
+      data:
+      events:
+      itm:
+        enable: 0x3
+      pcsampling:
+        period: 16384
+      synchronization:
+        DWT: 16M
+    - pname: M55_HP
+      core: Cortex-M55
+      disable:
+      timestamps:
+        itm-prescaler: 1
+      data:
+      events:
+      itm:
+        enable: 0x0
+      pcsampling:
+        period: 0
+      synchronization:
+        DWT: 16M

@@ -1,0 +1,73 @@
+# NoWaitMulti uses the same round/phase and payload comparator mapping.
+ctrace:
+  created-by: CMSIS Debugger
+  setup:
+    - pname: M55_HE
+      core: Cortex-M55
+      timestamps:
+        itm-prescaler: 1
+      data:
+        - location: 0x4009000c
+          label: HE_MHU0_TX_CH0_SET
+          access: W
+          size: 4
+          output: PC+value
+        # Use the control-channel slot for the sender's actual round writes.
+        - location: '"trace_no_wait.c"::trace_demo_round'
+          label: HE_DEMO_ROUND
+          access: W
+          size: 4
+          # Round and phase stores are adjacent; avoid an extra PC packet.
+          output: value
+        - location: '"trace_no_wait.c"::trace_demo_phase'
+          label: HE_DEMO_PHASE
+          access: W
+          size: 4
+          output: PC+value
+        - location: '"trace_no_wait.c"::trace_tx_ack_count'
+          label: HE_CH0_ACK_COUNT
+          access: W
+          size: 4
+          output: PC+value
+      exceptions:
+      itm:
+        enable: 0x0
+      pcsampling:
+        period: 0
+      synchronization:
+        DWT: 16M
+    - pname: M55_HP
+      core: Cortex-M55
+      timestamps:
+        itm-prescaler: 1
+      data:
+        # Observe the unchanged driver's actual payload read, not a copy or printf.
+        - location: 0x40080000
+          label: HP_MHU0_RX_CH0_ST
+          access: R
+          size: 4
+          output: PC+value
+        - location: 0x40080008
+          label: HP_MHU0_RX_CH0_CLR
+          access: W
+          size: 4
+          output: PC+value
+        # Keep payload read/clear and phase; record the receiver's own round.
+        - location: '"trace_no_wait.c"::trace_demo_round'
+          label: HP_DEMO_ROUND
+          access: W
+          size: 4
+          # Keep enough trace bandwidth for the following phase store.
+          output: value
+        - location: '"trace_no_wait.c"::trace_demo_phase'
+          label: HP_DEMO_PHASE
+          access: W
+          size: 4
+          output: PC+value
+      exceptions:
+      itm:
+        enable: 0x0
+      pcsampling:
+        period: 0
+      synchronization:
+        DWT: 16M

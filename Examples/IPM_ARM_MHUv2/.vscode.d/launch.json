@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "M55_HP CMSIS_DAP@pyOCD (launch)",
+            "type": "gdbtarget",
+            "request": "launch",
+            "cwd": "${command:cmsis-csolution.getSolutionDir}",
+            "program": "${command:cmsis-csolution.getBinaryFile}",
+            "gdb": "arm-none-eabi-gdb",
+            "auxiliaryGdb": true,
+            "preLaunchTask": "Alif: Load IPM for debug",
+            "initCommands": [
+                "monitor e7_ipm_reset",
+                "tbreak main"
+            ],
+            "customResetCommands": [
+                "monitor e7_ipm_reset",
+                "maintenance flush register-cache",
+                "maintenance flush dcache",
+                "tbreak main",
+                "continue"
+            ],
+            "target": {
+                "server": "pyocd",
+                "serverParameters": [
+                    "gdbserver",
+                    "--probe", "cmsisdap:",
+                    "--uid", "${config:cmsis-csolution.probe-id}",
+                    "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                    "--core", "0",
+                    "-O", "user_script=${command:cmsis-csolution.getSolutionDir}/pyocd_user.py",
+                    "--quiet",
+                    "--log", "*.cbuild_run,*server,pyocd.user_script=info"
+                ],
+                "port": "53333",
+                "serverDisconnectTimeout": 5000
+            },
+            "cmsis": {
+                "cbuildRunFile": "${command:cmsis-csolution.getCbuildRunFile}",
+                "updateConfiguration": "auto"
+            }
+        }
+    ]
+}

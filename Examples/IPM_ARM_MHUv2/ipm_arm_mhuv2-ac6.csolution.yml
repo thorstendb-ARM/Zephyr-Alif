@@ -14,23 +14,150 @@ solution:
         - west-board: alif_e7_dk/ae722f80f55d5xx/rtss
       west-defs:
         - SE_SERVICES: OFF
+        - TRACE_DEMO_RX_DELAY: OFF
+        - TRACE_DEMO_NO_WAIT: OFF
       target-set:
         - set:
           debugger:
-            name: CMSIS-DAP@pyOCD
-            port: 3333
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HP
             protocol: swd
             clock: 10000000
-            start-pname: M55_HE
+            start-pname: M55_HP
+            trace:
+              # The project hook manages the shared ETR; pyOCD writes the RAW file.
+              - trace-buffer:
+                mode: file
           images:
-            - project-context: M55_HE.Debug
             - project-context: M55_HP.Debug
+            - project-context: M55_HE.Debug
+
+    # Same board and trace setup, with a deliberate HE receive-delay fault.
+    - type: DevKit-E7-TraceDelay
+      board: Alif Semiconductor::DevKit-E7
+      device: Alif Semiconductor::AE722F80F55D5LS
+      variables:
+        - west-board: alif_e7_dk/ae722f80f55d5xx/rtss
+      west-defs:
+        - SE_SERVICES: OFF
+        - TRACE_DEMO_RX_DELAY: ON
+        - TRACE_DEMO_NO_WAIT: OFF
+      target-set:
+        - set:
+          debugger:
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HP
+            protocol: swd
+            clock: 10000000
+            start-pname: M55_HP
+            trace:
+              - trace-buffer:
+                mode: file
+          images:
+            - project-context: M55_HP.Debug
+            - project-context: M55_HE.Debug
+
+    # Twelve rounds with two different HE receive delays for trace analysis.
+    - type: DevKit-E7-TraceDelayMulti
+      board: Alif Semiconductor::DevKit-E7
+      device: Alif Semiconductor::AE722F80F55D5LS
+      variables:
+        - west-board: alif_e7_dk/ae722f80f55d5xx/rtss
+      west-defs:
+        - SE_SERVICES: OFF
+        - TRACE_DEMO_RX_DELAY: ON
+        - TRACE_DEMO_NO_WAIT: OFF
+        - TRACE_DEMO_ITERATIONS: 12
+        - TRACE_DEMO_DELAY_ROUND: 3
+        - TRACE_DEMO_DELAY_US: 15000
+        - TRACE_DEMO_SECOND_DELAY_ROUND: 8
+        - TRACE_DEMO_SECOND_DELAY_US: 30000
+      target-set:
+        - set:
+          debugger:
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HP
+            protocol: swd
+            clock: 10000000
+            start-pname: M55_HP
+            trace:
+              - trace-buffer:
+                mode: file
+          images:
+            - project-context: M55_HP.Debug
+            - project-context: M55_HE.Debug
+
+    # Compare correct handshakes with two unacknowledged writes to one channel.
+    - type: DevKit-E7-NoWait
+      board: Alif Semiconductor::DevKit-E7
+      device: Alif Semiconductor::AE722F80F55D5LS
+      variables:
+        - west-board: alif_e7_dk/ae722f80f55d5xx/rtss
+      west-defs:
+        - SE_SERVICES: OFF
+        - TRACE_DEMO_RX_DELAY: OFF
+        - TRACE_DEMO_NO_WAIT: ON
+      target-set:
+        - set:
+          debugger:
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HP
+            protocol: swd
+            clock: 10000000
+            start-pname: M55_HP
+            trace:
+              - trace-buffer:
+                mode: file
+          images:
+            - project-context: M55_HP.Debug
+            - project-context: M55_HE.Debug
+
+    # Twelve rounds with separate no-wait bursts in rounds four and nine.
+    - type: DevKit-E7-NoWaitMulti
+      board: Alif Semiconductor::DevKit-E7
+      device: Alif Semiconductor::AE722F80F55D5LS
+      variables:
+        - west-board: alif_e7_dk/ae722f80f55d5xx/rtss
+      west-defs:
+        - SE_SERVICES: OFF
+        - TRACE_DEMO_RX_DELAY: OFF
+        - TRACE_DEMO_NO_WAIT: ON
+        - TRACE_DEMO_NO_WAIT_ROUNDS: 12
+        - TRACE_DEMO_NO_WAIT_ROUND: 4
+        - TRACE_DEMO_SECOND_NO_WAIT_ROUND: 9
+      target-set:
+        - set:
+          debugger:
+            name: ULINKplus@pyOCD
+            gdbserver:
+              - port: 53333
+                pname: M55_HP
+            protocol: swd
+            clock: 10000000
+            start-pname: M55_HP
+            trace:
+              - trace-buffer:
+                mode: file
+          images:
+            - project-context: M55_HP.Debug
+            - project-context: M55_HE.Debug
 
     - type: DevKit-E8
       board: Alif Semiconductor::DevKit-E8
       device: Alif Semiconductor::AE822FA0E5597LS0
       variables:
         - west-board: alif_e8_dk/ae822fa0e5597xx0/rtss
+      west-defs:
+        - TRACE_DEMO_RX_DELAY: OFF
+        - TRACE_DEMO_NO_WAIT: OFF
       target-set:
         - set:
           images:
@@ -54,15 +181,8 @@ solution:
         - CONFIG_SIZE_OPTIMIZATIONS: y
 
   # List related projects.
+  # HP first: the E7 launcher uses the first symbols image via getBinaryFile.
   projects:
-    - west:
-        project-id: M55_HE
-        app-path: ./rtss_he
-        board: $west-board$_he
-        device: :M55_HE
-        west-defs:
-          - RTSS_HP_MHU0: ON
-          - CONFIG_ARMCLANG_STD_LIBC: y
     - west:
         project-id: M55_HP
         app-path: ./rtss_hp
@@ -70,6 +190,14 @@ solution:
         device: :M55_HP
         west-defs:
           - RTSS_HE_MHU0: ON
+          - CONFIG_ARMCLANG_STD_LIBC: y
+    - west:
+        project-id: M55_HE
+        app-path: ./rtss_he
+        board: $west-board$_he
+        device: :M55_HE
+        west-defs:
+          - RTSS_HP_MHU0: ON
           - CONFIG_ARMCLANG_STD_LIBC: y
 
   compiler: AC6

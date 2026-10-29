@@ -11,7 +11,9 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/ipm.h>
 
-#define ITERATIONS 10
+#ifndef TRACE_DEMO_ITERATIONS
+#define TRACE_DEMO_ITERATIONS 10
+#endif
 const struct device *mhu0_r;
 const struct device *mhu0_s;
 
@@ -83,7 +85,7 @@ int main(void)
 
 	/* wait until receiver gets ready */
 	k_sleep(K_MSEC(500));
-	while (i < ITERATIONS) {
+	while (i < TRACE_DEMO_ITERATIONS) {
 		/* Let RTSS_HP initiate data transfer */
 		send();
 		while (!msg_received)

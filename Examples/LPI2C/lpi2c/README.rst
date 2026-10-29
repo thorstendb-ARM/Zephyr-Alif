@@ -3,6 +3,12 @@
 LPI2C Sample
 ####################
 
+.. note::
+
+   This upstream Alif sample reference retains its original SDK assumptions and
+   output. For this repository's setup, target selection, build/debug and trace
+   capture, follow the `CMSIS workflow <../../../README.md>`_.
+
 Overview
 ********
 

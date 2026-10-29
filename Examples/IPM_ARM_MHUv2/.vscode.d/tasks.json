@@ -2,13 +2,33 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Alif: Load IPM for debug",
+            "type": "shell",
+            "command": "pyocd",
+            "args": [
+                "load",
+                "--probe", "cmsisdap:",
+                "--uid", "${config:cmsis-csolution.probe-id}",
+                "--cbuild-run", "${command:cmsis-csolution.getCbuildRunFile}",
+                "--no-reset",
+                "-O", "resume_on_disconnect=false"
+            ],
+            "options": {
+                "cwd": "${command:cmsis-csolution.getSolutionDir}"
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Alif: Install M55_HE or M55_HP debug stubs (single core configuration)",
             "type": "shell",
+            "options": {
+                "cwd": "${command:cmsis-csolution.getSolutionDir}"
+            },
             "command": [
-                "cp './.alif/M55_HE_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HE_mram_cfg.json';",
-                "cp './.alif/M55_HP_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HP_mram_cfg.json';",
-                "cp './.alif/M55_HP_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HP_mram_stub.bin';",
-                "cp './.alif/M55_HE_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HE_mram_stub.bin';",
+                "cp '../../.alif/M55_HE_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HE_mram_cfg.json';",
+                "cp '../../.alif/M55_HP_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HP_mram_cfg.json';",
+                "cp '../../.alif/M55_HP_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HP_mram_stub.bin';",
+                "cp '../../.alif/M55_HE_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HE_mram_stub.bin';",
                 "cd '${config:alif.setools.root}';",
                 "./app-gen-toc -f 'build/config/${command:cmsis-csolution.getProcessorName}_mram_cfg.json';",
                 "./app-write-mram -e app;",
@@ -29,6 +49,7 @@
                     "shell": {
                         "executable": "/bin/bash",
                         "args": [
+                            "-e",
                             "-c"
                         ]
                     }
@@ -39,6 +60,7 @@
                     "shell": {
                         "executable": "/bin/bash",
                         "args": [
+                            "-e",
                             "-c"
                         ]
                     }
@@ -49,10 +71,13 @@
         {
             "label": "Alif: Install M55_HE and M55_HP debug stubs (dual core configuration)",
             "type": "shell",
+            "options": {
+                "cwd": "${command:cmsis-csolution.getSolutionDir}"
+            },
             "command": [
-                "cp './.alif/M55_HP_HE_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HP_HE_mram_cfg.json';",
-                "cp './.alif/M55_HP_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HP_mram_stub.bin';",
-                "cp './.alif/M55_HE_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HE_mram_stub.bin';",
+                "cp '../../.alif/M55_HP_HE_mram_cfg.json' '${config:alif.setools.root}/build/config/M55_HP_HE_mram_cfg.json';",
+                "cp '../../.alif/M55_HP_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HP_mram_stub.bin';",
+                "cp '../../.alif/M55_HE_mram_stub.bin' '${config:alif.setools.root}/build/images/M55_HE_mram_stub.bin';",
                 "cd '${config:alif.setools.root}';",
                 "./app-gen-toc -f 'build/config/M55_HP_HE_mram_cfg.json';",
                 "./app-write-mram -p -d;"
@@ -72,6 +97,7 @@
                     "shell": {
                         "executable": "/bin/bash",
                         "args": [
+                            "-e",
                             "-c"
                         ]
                     }
@@ -82,6 +108,7 @@
                     "shell": {
                         "executable": "/bin/bash",
                         "args": [
+                            "-e",
                             "-c"
                         ]
                     }
